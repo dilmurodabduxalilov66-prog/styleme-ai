@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">StyleMe AI</string>
+    <string name="title_activity_main">StyleMe AI</string>
+    <string name="package_name">com.styleme.ai</string>
+    <string name="custom_url_scheme">com.styleme.ai</string>
+</resources>

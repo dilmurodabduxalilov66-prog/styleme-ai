@@ -1,0 +1,22 @@
+{
+  "name": "styleme-ai",
+  "version": "1.0.0",
+  "description": "StyleMe AI - AI-powered barber ecosystem monorepo",
+  "private": true,
+  "workspaces": [
+    "common/*",
+    "services/*"
+  ],
+  "scripts": {
+    "infra:up": "docker-compose up -d",
+    "infra:down": "docker-compose down",
+    "build:all": "npm run build --workspaces --if-present",
+    "test:all": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "mongoose": "^9.6.3"
+  }
+}

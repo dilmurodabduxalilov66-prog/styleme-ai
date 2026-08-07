@@ -1,0 +1,1 @@
+const http = require('http'); http.get('http://127.0.0.1:9001/api/v1/analytics/full', (res) => { let data = ''; res.on('data', (chunk) => data += chunk); res.on('end', () => console.log('STATUS:', res.statusCode, 'DATA:', data)); });

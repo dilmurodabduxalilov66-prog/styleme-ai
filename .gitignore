@@ -1,0 +1,118 @@
+# ==========================================
+# StyleMe AI - Public Repository .gitignore
+# ==========================================
+
+# 1. Environment & Secret Configuration Files
+.env
+.env.prod
+.env.production
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+!.env.example
+!.env.production.example
+
+# 2. Dependency Directories
+node_modules/
+node_modules
+services/*/node_modules/
+
+# 3. Next.js & Frontend Build Outputs
+.next/
+out/
+build/
+dist/
+services/frontend/.next/
+services/frontend/out/
+services/frontend/build/
+services/auth-service/dist/
+services/booking-service/dist/
+services/payment-service/dist/
+services/reputation-service/dist/
+
+# 4. Large AI/ML Model Weights & Binaries
+*.zip
+*.tar
+*.tar.gz
+*.pt
+*.pth
+*.tflite
+*.onnx
+*.bin
+*.safetensors
+buffalo_l.zip
+sam2_hiera_tiny.pt
+hair_segmenter.tflite
+services/ai-service/selfie_multiclass_256x256.tflite
+
+# 5. Temporary Archives & Fix Dumps
+*.tar.gz
+*.zip
+ai_service_pipeline_update.tar.gz
+ai_service_update.tar.gz
+calendar_fix.tar.gz
+changes.tar.gz
+common.tar
+final_fix.tar.gz
+fix.tar
+fix*.tar
+fix_booking.tar.gz
+fix_booking_v2.tar.gz
+fix_frontend.tar.gz
+fix_growth.tar.gz
+frontend-src.tar.gz
+frontend_fix.tar.gz
+next.tar.gz
+next.zip
+otp_bypass_fix.tar.gz
+project.tar
+tryon_slots_fix.tar.gz
+update_profiles.tar.gz
+update_vps.tar.gz
+
+# 6. Logs & Process IDs
+*.log
+logs/
+logs*.txt
+flog.txt
+ai_engine_dump.txt
+services.pids
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# 7. Uploads & Temporary Media Outputs
+uploads/
+uploads/*
+services/ai-service/uploads/
+services/ai-service/uploads/*
+test_faces/
+mock_face.jpg
+test_input.jpg
+test_mask_output.jpg
+
+# 8. Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# 9. Local Backups & Database Dumps
+local_backups/
+*.sql
+!init.sql
+
+# 10. IDE & OS Junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.user
