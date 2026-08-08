@@ -169,7 +169,12 @@ export class PaymentService {
       );
       const rank = rankRes.rows.length > 0 ? rankRes.rows[0].rank_grade : 'C';
       
-      const commissionRate = rank === 'S' ? 0.05 : rank === 'A' ? 0.07 : 0.10;
+      // Read dynamic platform settings from platform_settings table
+      const settingsRes = await client.query('SELECT base_commission_rate, s_rank_commission_rate FROM platform_settings LIMIT 1');
+      const baseCommission = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].base_commission_rate) / 100 : 0.02;
+      const sRankCommission = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].s_rank_commission_rate) / 100 : 0.01;
+
+      const commissionRate = rank === 'S' ? sRankCommission : baseCommission;
       const commissionAmount = amountPaid * commissionRate;
       const netBarberPayout = amountPaid - commissionAmount;
 
@@ -351,10 +356,19 @@ export class PaymentService {
         date: new Date(row.created_at).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
       }));
 
+      // Read dynamic platform settings from platform_settings table
+      const settingsRes = await client.query('SELECT base_commission_rate, s_rank_commission_rate, lockout_threshold FROM platform_settings LIMIT 1');
+      const baseCommission = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].base_commission_rate) : 2;
+      const sRankCommission = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].s_rank_commission_rate) : 1;
+      const lockoutLimit = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].lockout_threshold) : 500000;
+
       return {
         digitalWallet,
         cashWallet,
         commissionDebt,
+        lockoutLimit,
+        baseCommission,
+        sRankCommission,
         transactions
       };
     } finally {

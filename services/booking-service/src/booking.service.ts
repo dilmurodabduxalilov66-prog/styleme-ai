@@ -200,7 +200,13 @@ export class BookingService {
       );
       
       const rank = rankingRes.rows.length > 0 ? rankingRes.rows[0].rank_grade : 'C';
-      const commissionRate = rank === 'S' ? 0.05 : rank === 'A' ? 0.07 : 0.10;
+
+      // Read dynamic rates from platform_settings table
+      const settingsRes = await client.query('SELECT base_commission_rate, s_rank_commission_rate FROM platform_settings LIMIT 1');
+      const baseCommission = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].base_commission_rate) / 100 : 0.02;
+      const sRankCommission = settingsRes.rows.length > 0 ? parseFloat(settingsRes.rows[0].s_rank_commission_rate) / 100 : 0.01;
+
+      const commissionRate = rank === 'S' ? sRankCommission : baseCommission;
 
       const serviceAmount = booking.price ? parseFloat(booking.price) : 60000.00;
       const commissionDebt = serviceAmount * commissionRate;

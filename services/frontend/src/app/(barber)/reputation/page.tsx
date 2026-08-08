@@ -208,8 +208,8 @@ export default function BarberReputationPage() {
               <div className="space-y-1">
                 <h4 className="font-bold text-success">Komissiya imtiyozlari faol!</h4>
                 <p className="text-[10px] text-text-muted">
-                  Sizning S-Rank darajangiz uchun platforma komissiya stavkasi 10% dan 5% ga tushirilgan. 
-                  Bu sizga har bir uchrashuvdan qo'shimcha 5% sof foyda keltirmoqda.
+                  Sizning S-Rank darajangiz uchun platforma komissiya stavkasi minimal darajagacha imtiyozli pasaytirilgan. 
+                  Bu sizga har bir uchrashuvdan maximal sof foyda keltirmoqda.
                 </p>
               </div>
             </div>

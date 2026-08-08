@@ -32,6 +32,7 @@ export default function BarberLedgerPage() {
   const [digitalWallet, setDigitalWallet] = useState(0); 
   const [cashWallet, setCashWallet] = useState(0);
   const [commissionDebt, setCommissionDebt] = useState(0); 
+  const [lockoutLimit, setLockoutLimit] = useState(500000);
 
   // Double-entry transaction ledger
   const [transactions, setTransactions] = useState<LedgerTransaction[]>([]);
@@ -43,6 +44,9 @@ export default function BarberLedgerPage() {
         setDigitalWallet(data.digitalWallet || 0);
         setCashWallet(data.cashWallet || 0);
         setCommissionDebt(data.commissionDebt || 0);
+        if (data.lockoutLimit) {
+          setLockoutLimit(data.lockoutLimit);
+        }
         setTransactions(data.transactions || []);
       } catch (err) {
         console.error('Failed to fetch ledger:', err);
@@ -51,9 +55,8 @@ export default function BarberLedgerPage() {
     fetchLedger();
   }, []);
 
-  // Lockout threshold parameters
-  const warningLimit = 300000;
-  const lockoutLimit = 450000;
+  // Dynamic Lockout threshold parameters
+  const warningLimit = lockoutLimit * 0.7;
   const isLocked = commissionDebt >= lockoutLimit;
   const isWarned = commissionDebt >= warningLimit && commissionDebt < lockoutLimit;
 
