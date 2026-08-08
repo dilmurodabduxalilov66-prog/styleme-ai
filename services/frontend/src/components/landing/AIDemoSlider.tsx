@@ -55,7 +55,7 @@ export default function AIDemoSlider() {
       >
         {/* Before Image (Left Side) */}
         <img 
-          src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600&h=800" 
+          src="/hero_user.png" 
           alt="Before haircut styling" 
           className="absolute inset-0 w-full h-full object-cover"
           draggable="false"
