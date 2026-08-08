@@ -181,7 +181,7 @@ export default function ClientTicketPage() {
                   <div className="flex items-center gap-6">
                     {/* Simulated SVG QR code */}
                     <div className="h-20 w-20 bg-white p-2 rounded-lg shrink-0 flex items-center justify-center">
-                      <div className="h-16 w-16 bg-[url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=100&h=100')] bg-cover"></div>
+                      <div className="h-16 w-16 bg-[url('/hero_user.png')] bg-cover"></div>
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-text-muted uppercase">Sartaroshga ko'rsatish (Check-in)</p>

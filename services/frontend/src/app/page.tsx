@@ -78,9 +78,9 @@ export default function Home() {
                 <div className="hover-3d-tilt relative w-full max-w-[280px] sm:max-w-[320px] aspect-[9/18] rounded-[40px] border-[8px] border-white/10 glass-panel shadow-glow-purple overflow-hidden">
                   {/* Viewfinder simulation */}
                   <img 
-                    src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400&h=800"
+                    src="/hero_user.png"
                     alt="Smartphone App Tryon Preview"
-                    className="w-full h-full object-cover opacity-80"
+                    className="w-full h-full object-cover opacity-90"
                   />
                   {/* Mesh Overlay */}
                   <div className="absolute inset-0 border border-primary/30 bg-gradient-to-t from-primary/30 via-transparent to-transparent flex flex-col justify-end p-5">
@@ -271,7 +271,7 @@ export default function Home() {
 
                   <div className="relative z-10 glass-panel p-3 rounded-xl border border-border-glass flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-border-base bg-[url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=100&h=100')] bg-cover"></div>
+                      <div className="h-9 w-9 rounded-full bg-border-base bg-[url('/hero_user.png')] bg-cover"></div>
                       <div>
                         <h5 className="text-xs font-bold text-text-primary">Elyor Karimov</h5>
                         <p className="text-[10px] text-text-muted">Taper Fade bo'yicha usta</p>

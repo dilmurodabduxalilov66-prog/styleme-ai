@@ -70,7 +70,7 @@ export default function AIDemoSlider() {
           style={{ clipPath: `polygon(${sliderPosition}% 0, 100% 0, 100% 100%, ${sliderPosition}% 100%)` }}
         >
           <img 
-            src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=600&h=800" 
+            src="/hero_user.png" 
             alt="AI recommended fade haircut" 
             className="absolute inset-0 w-full h-full object-cover"
             draggable="false"
