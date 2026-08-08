@@ -15,11 +15,17 @@ export class AnalyticsService {
     const client = await this.dbPool.connect();
     try {
       // Get GMV (Gross Merchandise Volume)
-      const revenueRes = await client.query('SELECT SUM(amount) as gmv FROM payments WHERE status = $1', ['COMPLETED']);
+      const revenueRes = await client.query('SELECT COALESCE(SUM(amount), 0) as gmv FROM payments WHERE status = $1', ['SUCCEEDED']);
       const gmv = parseInt(revenueRes.rows[0].gmv || '0', 10);
       
-      // Net Revenue is 2% of GMV (just an example metric for the platform)
-      const netRevenue = Math.round(gmv * 0.02);
+      // Net Revenue is the sum of actual historical commission debits recorded in double-entry transactions
+      const netRes = await client.query(`
+        SELECT COALESCE(SUM(amount), 0) as net 
+        FROM transactions 
+        WHERE type = 'COMMISSION_DEBIT'
+      `);
+      const actualNet = parseInt(netRes.rows[0].net || '0', 10);
+      const netRevenue = actualNet > 0 ? actualNet : Math.round(gmv * 0.10);
 
       // Bookings count
       const bookingsRes = await client.query('SELECT COUNT(*) as count FROM bookings');
@@ -241,36 +247,59 @@ export class AnalyticsService {
       const baseCommissionRate = parseFloat(settingsRes.rows[0]?.base_commission_rate || '10') / 100;
       const sRankCommissionRate = parseFloat(settingsRes.rows[0]?.s_rank_commission_rate || '5') / 100;
 
-      // Revenue (GMV) and Net Revenue
-      const revenueRes = await client.query(`
-        SELECT 
-          SUM(p.amount) as total_gmv,
-          SUM(
+      // Revenue (GMV) and Net Revenue (Immutable actual historical debits)
+      const gmvRes = await client.query(`
+        SELECT COALESCE(SUM(amount), 0) as total_gmv
+        FROM payments
+        WHERE status = 'SUCCEEDED'
+      `);
+      const total_revenue = parseInt(gmvRes.rows[0].total_gmv || '0', 10);
+
+      const netRes = await client.query(`
+        SELECT COALESCE(SUM(amount), 0) as total_net
+        FROM transactions
+        WHERE type = 'COMMISSION_DEBIT'
+      `);
+      let net_revenue = parseInt(netRes.rows[0].total_net || '0', 10);
+      
+      // Fallback calculation if no transaction rows exist yet
+      if (net_revenue === 0 && total_revenue > 0) {
+        const fallbackRes = await client.query(`
+          SELECT SUM(
             p.amount * CASE 
               WHEN br.rank_grade = 'S' THEN $1::numeric 
               ELSE $2::numeric 
             END
-          ) as total_net
-        FROM payments p
-        JOIN bookings b ON p.booking_id = b.id
-        LEFT JOIN barber_rankings br ON b.barber_id = br.barber_id
-        WHERE p.status = 'SUCCEEDED'
-      `, [sRankCommissionRate, baseCommissionRate]);
-      
-      const total_revenue = parseInt(revenueRes.rows[0].total_gmv || '0', 10);
-      const net_revenue = parseInt(revenueRes.rows[0].total_net || '0', 10);
+          ) as fallback_net
+          FROM payments p
+          JOIN bookings b ON p.booking_id = b.id
+          LEFT JOIN barber_rankings br ON b.barber_id = br.barber_id
+          WHERE p.status = 'SUCCEEDED'
+        `, [sRankCommissionRate, baseCommissionRate]);
+        net_revenue = parseInt(fallbackRes.rows[0].fallback_net || '0', 10);
+      }
 
       const monthlyRevRes = await client.query(`
-        SELECT to_char(p.created_at, 'Mon') as month, SUM(p.amount) as revenue
+        SELECT 
+          to_char(p.created_at, 'Mon') as month, 
+          SUM(p.amount) as revenue,
+          COALESCE(
+            SUM(
+              (SELECT t.amount FROM transactions t WHERE t.payment_id = p.id AND t.type = 'COMMISSION_DEBIT' LIMIT 1)
+            ),
+            SUM(p.amount * $1::numeric)
+          ) as net_revenue
         FROM payments p
         WHERE p.status = 'SUCCEEDED'
         GROUP BY 1
         ORDER BY MIN(p.created_at) DESC
         LIMIT 6
-      `);
+      `, [baseCommissionRate]);
+
       const monthly_revenue = monthlyRevRes.rows.reverse().map(r => ({
         month: r.month,
-        revenue: parseInt(r.revenue || '0', 10)
+        revenue: parseInt(r.revenue || '0', 10),
+        netRevenue: parseInt(r.net_revenue || '0', 10)
       }));
 
       // Top Barbers

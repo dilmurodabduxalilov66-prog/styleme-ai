@@ -20,7 +20,7 @@ interface FinancialStats {
   netRevenue: number;
   bookingsCount: number;
   activeUsers: number;
-  monthlyRevenue: { month: string; revenue: number }[];
+  monthlyRevenue: { month: string; revenue: number; netRevenue?: number }[];
 }
 
 export default function OwnerBIPage() {
@@ -48,8 +48,11 @@ export default function OwnerBIPage() {
 
     if (stats.monthlyRevenue && stats.monthlyRevenue.length > 0) {
       const lastMonth = stats.monthlyRevenue[stats.monthlyRevenue.length - 1];
-      currentNet = Math.round(lastMonth.revenue * 0.02);
+      const effectiveRate = stats.gmv > 0 ? (stats.netRevenue / stats.gmv) : 0.10;
+      currentNet = lastMonth.netRevenue || Math.round(lastMonth.revenue * effectiveRate);
       currentMonthName = lastMonth.month;
+    } else if (stats.netRevenue > 0) {
+      currentNet = stats.netRevenue;
     }
 
     const now = new Date();
@@ -73,17 +76,18 @@ export default function OwnerBIPage() {
       { month: `${m2} (Prognoz)`, revenue: Math.round(currentNet * rate2 * multiplier) },
       { month: `${m3} (Prognoz)`, revenue: Math.round(currentNet * rate3 * multiplier) }
     ];
-  }, [scenario, stats.monthlyRevenue]);
+  }, [scenario, stats.monthlyRevenue, stats.netRevenue, stats.gmv]);
 
   const chartPoints = React.useMemo(() => {
     if (!stats.monthlyRevenue || stats.monthlyRevenue.length === 0) return null;
     
     const last3 = stats.monthlyRevenue.slice(-3);
     while (last3.length < 3) {
-      last3.unshift({ month: '-', revenue: 0 });
+      last3.unshift({ month: '-', revenue: 0, netRevenue: 0 });
     }
 
-    const revs = last3.map(r => r.revenue * 0.02);
+    const effectiveRate = stats.gmv > 0 ? (stats.netRevenue / stats.gmv) : 0.10;
+    const revs = last3.map(r => r.netRevenue || Math.round(r.revenue * effectiveRate));
     const maxRev = Math.max(...revs, 1000);
     const minRev = 0; // lock min to 0
 
@@ -101,7 +105,7 @@ export default function OwnerBIPage() {
       dots: [y1, y2, y3],
       labels: last3.map(r => r.month)
     };
-  }, [stats.monthlyRevenue]);
+  }, [stats.monthlyRevenue, stats.netRevenue, stats.gmv]);
 
   const fetchBI = async () => {
     setLoading(true);
