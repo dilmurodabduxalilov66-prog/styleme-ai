@@ -55,7 +55,7 @@ export default function AIDemoSlider() {
       >
         {/* Before Image (Left Side) */}
         <img 
-          src="/hero_user.png" 
+          src="/slider_before.png" 
           alt="Before haircut styling" 
           className="absolute inset-0 w-full h-full object-cover"
           draggable="false"
@@ -70,7 +70,7 @@ export default function AIDemoSlider() {
           style={{ clipPath: `polygon(${sliderPosition}% 0, 100% 0, 100% 100%, ${sliderPosition}% 100%)` }}
         >
           <img 
-            src="/hero_user.png" 
+            src="/slider_after.png" 
             alt="AI recommended fade haircut" 
             className="absolute inset-0 w-full h-full object-cover"
             draggable="false"
