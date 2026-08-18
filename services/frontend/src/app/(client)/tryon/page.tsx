@@ -232,6 +232,8 @@ export default function AIScannerPage() {
       setState('IDLE');
       if (err.response?.status === 422) {
         setErrorMsg("Yuz aniqlanmadi. Iltimos, kameraga to'g'ri qarab, yorug'roq joyda qaytadan rasmga tushiring.");
+      } else if (err.response?.data?.detail && typeof err.response.data.detail === 'string') {
+        setErrorMsg(err.response.data.detail);
       } else {
         setErrorMsg("AI xizmatiga ulanishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
       }
@@ -276,12 +278,52 @@ export default function AIScannerPage() {
 
 
 
+  const processImageFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              setPhotoBlob(blob);
+              setPhotoUrl(URL.createObjectURL(blob));
+              triggerAnalysis(blob);
+            }
+          }, 'image/jpeg', 0.9);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPhotoBlob(file);
-      setPhotoUrl(URL.createObjectURL(file));
-      triggerAnalysis(file);
+      processImageFile(file);
     }
   };
 
@@ -300,9 +342,7 @@ export default function AIScannerPage() {
     setIsDraggingFile(false);
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      setPhotoBlob(file);
-      setPhotoUrl(URL.createObjectURL(file));
-      triggerAnalysis(file);
+      processImageFile(file);
     }
   };
 
