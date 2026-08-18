@@ -54,8 +54,8 @@ export default function ForgotPasswordPage() {
       setErrorMsg('6 xonali SMS OTP kodini kiriting');
       return;
     }
-    if (newPassword.length < 6) {
-      setErrorMsg('Yangi parol kamida 6 belgidan iborat bo\'lishi kerak');
+    if (newPassword.length < 4) {
+      setErrorMsg('Yangi parol kamida 4 belgidan iborat bo\'lishi kerak');
       return;
     }
 
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
                   <input
                     type="password"
                     required
-                    minLength={6}
+                    minLength={4}
                     placeholder="Yangi parolingizni kiriting"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}

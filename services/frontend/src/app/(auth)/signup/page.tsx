@@ -29,24 +29,6 @@ export default function SignupPage() {
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(0);
 
-  // Password strength calculation
-  const getPasswordStrength = () => {
-    if (password.length === 0) return { score: 0, text: 'Yo\'q (None)', color: 'bg-border-base' };
-    if (password.length < 6) return { score: 1, text: 'Juda zaif', color: 'bg-danger' };
-    
-    let score = 1;
-    if (password.length >= 8) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 2) return { score: 2, text: 'Zaif', color: 'bg-danger' };
-    if (score <= 4) return { score: 3, text: 'O\'rtacha', color: 'bg-warning' };
-    return { score: 4, text: 'Kuchli (Xavfsiz)', color: 'bg-success' };
-  };
-
-  const strength = getPasswordStrength();
-
   // Countdown timer effect
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -60,22 +42,22 @@ export default function SignupPage() {
     e.preventDefault();
     setErrorMsg(null);
 
-    if (!phone.trim()) {
+    if (!phone.replace(/[\s()-]/g, '')) {
       setErrorMsg('OTP qabul qilish uchun Telefon raqam kiritishingiz shart');
       return;
     }
-    if (!/^\+?[0-9]{9,15}$/.test(phone.replace(/[\s()+-]/g, ''))) {
+    if (!/^\+?[0-9]{9,15}$/.test(phone.replace(/[\s()-]/g, ''))) {
       setErrorMsg('Telefon raqam formati noto\'g\'ri');
       return;
     }
-    if (password.length < 6) {
-      setErrorMsg('Parol kamida 6 ta belgidan iborat bo\'lishi kerak');
+    if (password.length < 4) {
+      setErrorMsg('Parol kamida 4 ta belgidan iborat bo\'lishi kerak');
       return;
     }
 
     setIsLoading(true);
     try {
-      const res = await api.post('/auth/send-otp', { phone_number: phone.trim() });
+      const res = await api.post('/auth/send-otp', { phone_number: phone.replace(/[\s()-]/g, '') });
       if (res.data && res.data.test_code) {
         alert(res.data.message);
         setOtp(res.data.test_code);
@@ -98,27 +80,28 @@ export default function SignupPage() {
     try {
       // 1. Verify OTP
       await api.post('/auth/verify-otp', {
-        phone_number: phone.trim(),
+        phone_number: phone.replace(/[\s()-]/g, ''),
         otp: otp.trim(),
       });
 
       // 2. Signup
       await api.post('/auth/signup', {
         email: email.trim() || undefined,
-        phone_number: phone.trim(),
+        phone_number: phone.replace(/[\s()-]/g, ''),
         password: password,
         role,
       });
 
       // 3. Auto login to set tokens
       const loginRes = await api.post('/auth/login', {
-        username: phone.trim(),
+        username: phone.replace(/[\s()-]/g, ''),
         password: password,
       });
       const token = loginRes.data.access_token;
+      const refreshToken = loginRes.data.refresh_token;
       const decodedUser = decodeJwt(token);
       if (decodedUser) {
-        setAuth(token, decodedUser);
+        setAuth(token, decodedUser, refreshToken);
       }
 
       router.push(`/`);
@@ -270,22 +253,6 @@ export default function SignupPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                
-                {/* Strength Meter Grid */}
-                {password.length > 0 && (
-                  <div className="mt-3 space-y-1">
-                    <div className="flex justify-between text-[10px] font-semibold text-text-muted">
-                      <span>Parol kuchi:</span>
-                      <span className="text-text-primary font-bold">{strength.text}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-border-base rounded-full overflow-hidden">
-                      <div 
-                        className={cn("h-full transition-all duration-300", strength.color)}
-                        style={{ width: `${(strength.score / 4) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 

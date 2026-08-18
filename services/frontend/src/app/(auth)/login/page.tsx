@@ -34,10 +34,12 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+    setErrorMsg(null);
+
     try {
       // Connect to auth-service /login API
       const { data } = await api.post('/auth/login', {
-        username: username.trim(),
+        username: username.replace(/[\s()-]/g, ''),
         password,
       });
 
